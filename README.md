@@ -11,29 +11,29 @@
       <p>Time to learn new stuff, and not just something that is "kinda" cool, but rather something that is <u>EXTREMELY</u> cool!</p>
       <p>For those who thought that programming and art could NOT be combined together, ShaderToy came in to prove You wrong!</p>
       <p>Even though Shader<i>Toy</i> literally has <i>"Toy"</i> in its name, reality is that GLSL shaders are not limited to just being a fun thing to play around with!</p>
-      <p>GLSL shaders are widely-used by <b>MOST</b> game engines, including some of fan favorite, Godot and GameMaker, so learning shaders can come in really handy!</p>
+      <p>This is when the idea to making this project came to my mind - ShaderToy, but local and on C</p>
     </td>
   </tr>
 </table>
 
+GLSL shaders are widely-used by **MOST** game engines, including some of fan favorites, Godot and GameMaker; in other words - learning shaders can come in really handy!
+
 ## Getting started
 1. Install `glfw3` and `glew` packages using your package manager, or simply build and install them from source.
 2. To build, do either one of these:
--   Use `./autobuild` shell script for simple building of the project. No no bloat, build systems, pure GCC
+-   Use `./autobuild` shell script for simple building of the project. Zero bloat and build systems, just pure GCC
 -   Use GCC itself, don't forget to provide needed flags for libraries that we're using here!
 3. ???
 4. Profit!
 
 Since GLSL shaders can compile at run-time, You don't even have to recompile the main C source file every time you make a small change to the shader!
-Just restart the compiled binary and it will automatically re-compile the shaders for You! 
+Just click `R` on your keyboard and all of the shaders will automatically be re-compiled for You! 
 This also means that if there's an error in the shader's code, it will be printed out to you verbosely and You will be able to figure out what went wrong!
-All of that - on-the-go, no time wasted waiting for the whole program to compile and link.
-
-In future a hotkey for reloading and recompiling shaders will be added, so stay tuned for that!
+All of that - on-the-go, no time wasted waiting for the whole program to compile, link, or even restart!
 
 Here's a small demonstration video
 
-![demo](docs/demo.mp4)
+[![demo](https://i.ytimg.com/vi/j519qeBmu3Y/maxresdefault.jpg)](https://youtu.be/j519qeBmu3Y "CShaderToy demo")
 
 
 ## What are you watining for? Go ahead and make something cool!
