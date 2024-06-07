@@ -89,6 +89,9 @@ int main(void) {
     GLuint vertex_shader   = compile_shader(vertex_shader_source, GL_VERTEX_SHADER);
     GLuint fragment_shader = compile_shader(fragment_shader_source, GL_FRAGMENT_SHADER);
 
+    free(vertex_shader_source);
+    free(fragment_shader_source);
+
     // Link shaders and export the program
     GLuint shader_program = LINK_SHADERS(vertex_shader, fragment_shader);
 
