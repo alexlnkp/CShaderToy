@@ -1,0 +1,33 @@
+#!/bin/bash
+
+set -e
+
+_C_STANDARD=11 # c standard
+_O_LEVEL=3 # optim
+
+_LIBS="glfw3 glew"
+
+# basic
+_COMPILE_OPTIONS="-Wall -Wextra"
+_COMPILE_OPTIONS="${_COMPILE_OPTIONS} -std=c${_C_STANDARD}"
+_COMPILE_OPTIONS="${_COMPILE_OPTIONS} -O${_O_LEVEL}"
+
+_COMPILE_OPTIONS="${_COMPILE_OPTIONS} -flto -Wl,-z,now -Wl,-z,relro -Wl,--build-id=none"
+
+# libs
+_COMPILE_OPTIONS="${_COMPILE_OPTIONS}$(pkgconf --cflags ${_LIBS}) $(pkgconf --libs ${_LIBS})"
+
+_SOURCES="demo-6624.c"
+
+echo "Running:"
+echo "    gcc ${_COMPILE_OPTIONS} ${_SOURCES} -o demo-6624"
+
+gcc ${_COMPILE_OPTIONS} ${_SOURCES} -o demo-6624
+echo "filesize after build: $(wc -c demo-6624)"
+
+# excessive stripping like oh my god
+strip -R .comment demo-6624
+strip -S --strip-unneeded --remove-section=.note.gnu.gold-version --remove-section=.comment --remove-section=.note --remove-section=.note.gnu.build-id --remove-section=.note.ABI-tag demo-6624
+strip --remove-section=.jcr --remove-section=.got.plt demo-6624
+strip --remove-section=.eh_frame --remove-section=.eh_frame_ptr --remove-section=.eh_frame_hdr demo-6624
+echo "filesize after strip: $(wc -c demo-6624)"
