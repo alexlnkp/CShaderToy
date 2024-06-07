@@ -5,6 +5,17 @@
 #include <stdlib.h>
 
 #define LINK_SHADERS(...) link_shaders(__VA_ARGS__, 0)
+#define REMOVE_SHADERS(...) remove_shaders(__VA_ARGS__, 0)
+
+static GLuint global_shader_program = 0;
+
+GLuint get_global_shader_program() {
+    return global_shader_program;
+}
+
+void set_global_shader_program(GLuint shader_program) {
+    global_shader_program = shader_program;
+}
 
 char* read_shader(const char* filename) {
     FILE* fp = fopen(filename, "rb");
@@ -59,6 +70,41 @@ GLuint link_shaders(GLuint first_shader, ...) {
     return shader_program;
 }
 
+void remove_shaders(GLuint first_shader, ...) {
+    va_list shaders;
+    va_start(shaders, first_shader);
+    
+    GLuint shader = first_shader;
+    do {
+        glDeleteShader(shader);
+        shader = va_arg(shaders, GLuint);
+    } while (shader != 0);
+
+    va_end(shaders);
+}
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+        glfwSetWindowShouldClose(window, GLFW_TRUE);
+    }
+    if (key == GLFW_KEY_R && action == GLFW_PRESS) {
+        const char* vertex_shader_source = read_shader("vertex.frag");
+        const char* fragment_shader_source = read_shader("colors.frag");
+
+        GLuint vertex_shader = compile_shader(vertex_shader_source, GL_VERTEX_SHADER);
+        GLuint fragment_shader = compile_shader(fragment_shader_source, GL_FRAGMENT_SHADER);
+
+        glDeleteProgram(global_shader_program);
+        global_shader_program = LINK_SHADERS(vertex_shader, fragment_shader);
+        glUseProgram(global_shader_program);
+
+        REMOVE_SHADERS(vertex_shader, fragment_shader);
+
+        free(vertex_shader_source);
+        free(fragment_shader_source);
+    }
+}
+
 int main(void) {
     // Initialize GLFW
     if (!glfwInit()) {
@@ -73,6 +119,8 @@ int main(void) {
         glfwTerminate();
         return -1;
     }
+
+    glfwSetKeyCallback(window, key_callback);
 
     // Make the window's context current
     glfwMakeContextCurrent(window);
@@ -93,7 +141,9 @@ int main(void) {
     free(fragment_shader_source);
 
     // Link shaders and export the program
-    GLuint shader_program = LINK_SHADERS(vertex_shader, fragment_shader);
+    global_shader_program = LINK_SHADERS(vertex_shader, fragment_shader);
+
+    REMOVE_SHADERS(vertex_shader, fragment_shader);
 
     // create da triangle
     GLfloat vertices[] = {
@@ -103,7 +153,7 @@ int main(void) {
     }; 
 
     // Use our shader program when we want to render an object
-    glUseProgram(shader_program);
+    glUseProgram(global_shader_program);
 
     GLuint VBO, VAO;
     // Generate and bind a Vertex Array Object
@@ -125,8 +175,8 @@ int main(void) {
     glBindBuffer(GL_ARRAY_BUFFER, 0); 
     glBindVertexArray(0); 
 
-    GLuint iTimeUniform = glGetUniformLocation(shader_program, "iTime"      );
-    GLuint iReslUniform = glGetUniformLocation(shader_program, "iResolution");
+    GLuint iTimeUniform = glGetUniformLocation(global_shader_program, "iTime"      );
+    GLuint iReslUniform = glGetUniformLocation(global_shader_program, "iResolution");
 
     // The render loop
     while (!glfwWindowShouldClose(window)) {
@@ -141,7 +191,7 @@ int main(void) {
         glUniform2f(iReslUniform, 400.f, 400.f);
 
         // Draw the triangle
-        glUseProgram(shader_program);
+        glUseProgram(global_shader_program);
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
         glBindVertexArray(0);
@@ -155,7 +205,7 @@ int main(void) {
 
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    glDeleteProgram(shader_program);
+    glDeleteProgram(global_shader_program);
 
     glfwTerminate();
     return 0;
