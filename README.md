@@ -63,4 +63,4 @@ Here's a small demonstration video
   </tr>
 </table>
 
-## What are you watining for? Go ahead and make something cool!
+## What are you waiting for? Go ahead and make something cool!
