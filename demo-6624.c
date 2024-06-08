@@ -1,11 +1,15 @@
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
 #define LINK_SHADERS(...) link_shaders(__VA_ARGS__, 0)
 #define REMOVE_SHADERS(...) remove_shaders(__VA_ARGS__, 0)
+
+#define WINDOW_WIDTH  600
+#define WINDOW_HEIGHT 600
 
 static GLuint global_shader_program = 0;
 
@@ -110,6 +114,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
 }
 
+void resize_callback(GLFWwindow* window, int width, int height) {
+    glfwGetFramebufferSize(window, &width, &height);
+    glViewport(0, 0, width, height);
+}
+
 /// @brief Triangulates a convex polygon
 /// @param polygonVertices Array of vertices
 /// @param vertexCount Num of vertices
@@ -185,8 +194,21 @@ int main(void) {
         return -1;
     }
 
+    const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+ 
+    glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+    glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+    glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+    glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+    glfwWindowHint(GLFW_DECORATED, GL_FALSE);
+    glfwWindowHint(GLFW_SCALE_TO_MONITOR, GL_FALSE);
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
     // Create a windowed mode window and its OpenGL context
-    GLFWwindow* window = glfwCreateWindow(400, 400, "6624", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "6624", NULL, NULL);
     if (!window) {
         fprintf(stderr, "Failed to create GLFW window\n");
         glfwTerminate();
@@ -194,6 +216,7 @@ int main(void) {
     }
 
     glfwSetKeyCallback(window, key_callback);
+    glfwSetFramebufferSizeCallback(window, resize_callback);
 
     // Make the window's context current
     glfwMakeContextCurrent(window);
@@ -272,9 +295,11 @@ int main(void) {
     GLuint iTimeUniform = glGetUniformLocation(global_shader_program, "iTime"      );
     GLuint iReslUniform = glGetUniformLocation(global_shader_program, "iResolution");
 
+    int width, height;
+
     // The render loop
     while (!glfwWindowShouldClose(window)) {
-
+        glfwGetFramebufferSize(window, &width, &height);
         // Render
         glClear(GL_COLOR_BUFFER_BIT);
 
@@ -282,7 +307,7 @@ int main(void) {
         float timeValue = glfwGetTime();
         glUniform1f(iTimeUniform, timeValue);
 
-        glUniform2f(iReslUniform, 400.f, 400.f);
+        glUniform2f(iReslUniform, (float)width, (float)height);
 
         // Draw the triangle
         glBindVertexArray(VAO);
