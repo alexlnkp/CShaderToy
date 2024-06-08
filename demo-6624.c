@@ -8,6 +8,8 @@
 #define LINK_SHADERS(...) link_shaders(__VA_ARGS__, 0)
 #define REMOVE_SHADERS(...) remove_shaders(__VA_ARGS__, 0)
 
+#define ARR_LEN(x) (sizeof(x) / sizeof(x[0]))
+
 #define WINDOW_WIDTH  600
 #define WINDOW_HEIGHT 600
 
@@ -258,7 +260,7 @@ int main(void) {
 
     GLuint* indices;
     size_t indexCount;
-    size_t vertexCount = 5;
+    size_t vertexCount = (size_t)(ARR_LEN(vertices) / 3);
 
     // TriangulateConvexPolygon(vertices, vertexCount, &indices, &indexCount);
     CreateTriangleStripIndices(vertexCount, &indices, &indexCount);
