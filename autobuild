@@ -14,6 +14,9 @@ _COMPILE_OPTIONS="${_COMPILE_OPTIONS} -O${_O_LEVEL}"
 
 _COMPILE_OPTIONS="${_COMPILE_OPTIONS} -flto -Wl,-z,now -Wl,-z,relro -Wl,--build-id=none"
 
+# made to suppress GLFW warnings which are inevitable
+_COMPILE_OPTIONS="${_COMPILE_OPTIONS} -Wno-unused-parameter"
+
 # libs
 _COMPILE_OPTIONS="${_COMPILE_OPTIONS}$(pkgconf --cflags ${_LIBS}) $(pkgconf --libs ${_LIBS})"
 

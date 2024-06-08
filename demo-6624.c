@@ -132,8 +132,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
     if (key == GLFW_KEY_R && action == GLFW_PRESS) {
-        const char* vertex_shader_source = read_shader("vertex.frag");
-        const char* fragment_shader_source = read_shader("colors.frag");
+        char* vertex_shader_source = read_shader("vertex.frag");
+        char* fragment_shader_source = read_shader("colors.frag");
 
         GLuint vertex_shader = compile_shader(vertex_shader_source, GL_VERTEX_SHADER);
         GLuint fragment_shader = compile_shader(fragment_shader_source, GL_FRAGMENT_SHADER);
@@ -160,7 +160,7 @@ void resize_callback(GLFWwindow* window, int width, int height) {
 /// @param indices Array of indices
 /// @param indexCount Num of indices
 /// @note Assuming the polygon vertices are defined in a CCW order and are convex
-void TriangulateConvexPolygon(const float* polygonVertices, size_t vertexCount, GLuint** indices, size_t* indexCount) {
+void TriangulateConvexPolygon(size_t vertexCount, GLuint** indices, size_t* indexCount) {
     if (vertexCount < 3) {
         // Not enough vertices to form a polygon
         *indices = NULL;
@@ -255,8 +255,8 @@ int main(void) {
     // Initialize GLEW
     _INIT_GLEW();
 
-    const char* vertex_shader_source   = read_shader("vertex.frag");
-    const char* fragment_shader_source = read_shader("colors.frag");
+    char* vertex_shader_source   = read_shader("vertex.frag");
+    char* fragment_shader_source = read_shader("colors.frag");
 
     GLuint vertex_shader   = compile_shader(vertex_shader_source, GL_VERTEX_SHADER);
     GLuint fragment_shader = compile_shader(fragment_shader_source, GL_FRAGMENT_SHADER);
@@ -288,7 +288,7 @@ int main(void) {
     size_t indexCount;
     size_t vertexCount = (size_t)(ARR_LEN(vertices) / 3);
 
-    // TriangulateConvexPolygon(vertices, vertexCount, &indices, &indexCount);
+    // TriangulateConvexPolygon(vertexCount, &indices, &indexCount);
     CreateTriangleStripIndices(vertexCount, &indices, &indexCount);
 
     // Use our shader program when we want to render an object
