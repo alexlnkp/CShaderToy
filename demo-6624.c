@@ -70,6 +70,11 @@ GLuint link_shaders(GLuint first_shader, ...) {
     return shader_program;
 }
 
+/// @brief Removes a list of shaders
+/// @param first_shader First shader to remove
+/// @param ... The rest of the shaders to remove
+/// @note The last shader must be 0
+/// @note You may also use REMOVE_SHADERS() macro to not specify 0 in the end
 void remove_shaders(GLuint first_shader, ...) {
     va_list shaders;
     va_start(shaders, first_shader);
@@ -102,6 +107,74 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
         free(vertex_shader_source);
         free(fragment_shader_source);
+    }
+}
+
+/// @brief Triangulates a convex polygon
+/// @param polygonVertices Array of vertices
+/// @param vertexCount Num of vertices
+/// @param indices Array of indices
+/// @param indexCount Num of indices
+/// @note Assuming the polygon vertices are defined in a CCW order and are convex
+void TriangulateConvexPolygon(const float* polygonVertices, size_t vertexCount, GLuint** indices, size_t* indexCount) {
+    if (vertexCount < 3) {
+        // Not enough vertices to form a polygon
+        *indices = NULL;
+        *indexCount = 0;
+        return;
+    }
+
+    // The number of triangles is vertexCount - 2
+    *indexCount = (vertexCount - 2) * 3;
+    *indices = malloc(*indexCount * sizeof(GLuint));
+    if (*indices == NULL) {
+        *indexCount = 0;
+        return;
+    }
+
+    // Assuming the polygon vertices are defined in a CCW order and are convex
+    for (size_t i = 0; i < vertexCount - 2; i++) {
+        (*indices)[3 * i + 0] = 0;          // Always the first vertex
+        (*indices)[3 * i + 1] = i + 1;
+        (*indices)[3 * i + 2] = i + 2;
+    }
+}
+
+/// @brief Creates indices for a triangle strip
+/// @details Agnostic of the polygon vertices order, instead links them together by their index in the array
+/// @param vertexCount Num of vertices
+/// @param indices Array of indices
+/// @param indexCount Num of indices
+/// @note The order must be Top -> Down -> Left -> Right
+/// @example Pentagon:
+///           0.0f,  1.0f, 0.0f, <- Top vertex
+///          -1.0f,  0.3f, 0.0f, <- Middle left vertex
+///           1.0f,  0.3f, 0.0f, <- Middle right vertex
+///          -0.6f, -1.0f, 0.0f, <- Bottom left vertex
+///           0.6f, -1.0f, 0.0f, <- Bottom right vertex
+void CreateTriangleStripIndices(size_t vertexCount, GLuint** indices, size_t* indexCount) {
+    if (vertexCount < 3) {
+        // Not enough vertices to form a single triangle
+        *indices = NULL;
+        *indexCount = 0;
+        return;
+    }
+
+    // The number of triangles is vertexCount - 2, each triangle has 3 indices
+    *indexCount = (vertexCount - 2) * 3;
+    *indices = malloc(*indexCount * sizeof(GLuint));
+
+    // Check for successful allocation
+    if (!*indices) {
+        *indexCount = 0;
+        return;
+    }
+
+    // Connect each set of three consecutive vertices
+    for (size_t i = 0; i < vertexCount - 2; i++) {
+        (*indices)[3 * i + 0] = i;
+        (*indices)[3 * i + 1] = i + 1;
+        (*indices)[3 * i + 2] = i + 2;
     }
 }
 
@@ -145,35 +218,56 @@ int main(void) {
 
     REMOVE_SHADERS(vertex_shader, fragment_shader);
 
-    // create da triangle
+    // This is a square
+    // GLfloat vertices[] = {
+    //     -1.0f, 1.0f, 0.0f,  // Top left
+    //     1.0f, 1.0f, 0.0f,   // Top right
+    //     -1.0f, -1.0f, 0.0f, // Bottom left
+    //     1.0f, -1.0f, 0.0f,  // Bottom right
+    // };
+
+    // This is da triangle
     GLfloat vertices[] = {
-        -0.5f, -0.5f, 0.0f, // Left  
-        0.5f, -0.5f, 0.0f, // Right 
-        0.0f,  0.5f, 0.0f  // Top   
-    }; 
+         0.0f,  0.5f, 0.0f, // Top
+        -0.5f, -0.5f, 0.0f, // Left
+         0.5f, -0.5f, 0.0f, // Right
+    };
+
+    GLuint* indices;
+    size_t indexCount;
+    size_t vertexCount = 5;
+
+    // TriangulateConvexPolygon(vertices, vertexCount, &indices, &indexCount);
+    CreateTriangleStripIndices(vertexCount, &indices, &indexCount);
 
     // Use our shader program when we want to render an object
     glUseProgram(global_shader_program);
 
-    GLuint VBO, VAO;
+    GLuint VBO, VAO, EBO;
     // Generate and bind a Vertex Array Object
     glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
+
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
 
     // Generate and bind a Vertex Buffer Object
-    glGenBuffers(1, &VBO);
-    // Bind our Vertex Buffer Object
+    glBindVertexArray(VAO);
+
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    // Load the vertex data into the Vertex Buffer Object
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    // Set the vertex attribute pointers
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * sizeof(GLuint), indices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLuint*)0);
+
     glEnableVertexAttribArray(0);
 
-    // Unbind the VBO and VAO
+    // Unbind the VBO (not the EBO) as it's saved in the VAO; the EBO will be unbound when the VAO is unbound.
     glBindBuffer(GL_ARRAY_BUFFER, 0); 
-    glBindVertexArray(0); 
+
+    // Unbind VAO (it's always a good thing to unbind any buffer/array to prevent strange bugs)
+    glBindVertexArray(0);
 
     GLuint iTimeUniform = glGetUniformLocation(global_shader_program, "iTime"      );
     GLuint iReslUniform = glGetUniformLocation(global_shader_program, "iResolution");
@@ -191,9 +285,8 @@ int main(void) {
         glUniform2f(iReslUniform, 400.f, 400.f);
 
         // Draw the triangle
-        glUseProgram(global_shader_program);
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
 
         // Swap front and back buffers
@@ -205,6 +298,8 @@ int main(void) {
 
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
+    free(indices);
     glDeleteProgram(global_shader_program);
 
     glfwTerminate();
