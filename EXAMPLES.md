@@ -5,21 +5,21 @@
     </td>
   <td valign="top">
 
-      #version 330 core
+    #version 330 core
 
-      uniform float iTime;
-      uniform vec2 iResolution;
-      out vec4 fragColor;
+    uniform float iTime;
+    uniform vec2 iResolution;
+    out vec4 fragColor;
 
-      void main() {
-          vec2 uv = gl_FragCoord.xy / iResolution;
+    void main() {
+        vec2 uv = gl_FragCoord.xy / iResolution;
 
-          vec3 x = iTime * 0.25 + uv.xyx + vec3(0, 2, 4);
+        vec3 x = iTime * 0.25 + uv.xyx + vec3(0, 2, 4);
 
-          vec3 col = 0.5 + 0.5 * sin(cos(x * 0.5) + sin(x * x * 0.5));
+        vec3 col = 0.5 + 0.5 * sin(cos(x * 0.5) + sin(x * x * 0.5));
 
-          fragColor = vec4(col, 1.0);
-      }
+        fragColor = vec4(col, 1.0);
+    }
   </td>
   </tr>
   <tr>
