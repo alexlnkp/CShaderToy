@@ -244,19 +244,19 @@ int main(void) {
     REMOVE_SHADERS(vertex_shader, fragment_shader);
 
     // This is a square
-    // GLfloat vertices[] = {
-    //     -1.0f, 1.0f, 0.0f,  // Top left
-    //     1.0f, 1.0f, 0.0f,   // Top right
-    //     -1.0f, -1.0f, 0.0f, // Bottom left
-    //     1.0f, -1.0f, 0.0f,  // Bottom right
-    // };
+    GLfloat vertices[] = {
+        -1.0f, 1.0f, 0.0f,  // Top left
+        1.0f, 1.0f, 0.0f,   // Top right
+        -1.0f, -1.0f, 0.0f, // Bottom left
+        1.0f, -1.0f, 0.0f,  // Bottom right
+    };
 
     // This is da triangle
-    GLfloat vertices[] = {
-         0.0f,  0.5f, 0.0f, // Top
-        -0.5f, -0.5f, 0.0f, // Left
-         0.5f, -0.5f, 0.0f, // Right
-    };
+    // GLfloat vertices[] = {
+    //      0.0f,  0.5f, 0.0f, // Top
+    //     -0.5f, -0.5f, 0.0f, // Left
+    //      0.5f, -0.5f, 0.0f, // Right
+    // };
 
     GLuint* indices;
     size_t indexCount;
