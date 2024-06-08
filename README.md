@@ -37,11 +37,12 @@ Here's a small demonstration video
 
 ## Examples
 <table>
+  
   <tr>
-    <td valign="top">
-      <img src="https://github.com/alexlnkp/CShaderToy/assets/79400603/1fc9d4ef-473f-4439-908e-9a90b26b80e2" alt="infamous-triangle" style="display: block; margin-left: auto; margin-right: auto;" />
+    <td valign="center" halign="center">
+      <img src="https://github.com/alexlnkp/CShaderToy/assets/79400603/1fc9d4ef-473f-4439-908e-9a90b26b80e2" alt="infamous-triangle" width="330" style="display: block; margin-left: auto; margin-right: auto;" />
     </td>
-      <td valign="top">
+  <td valign="top">
   
       #version 330 core
   
@@ -61,6 +62,44 @@ Here's a small demonstration video
     
   </td>
   </tr>
+  <tr>
+    <td valign="center" halign="center">
+      Made by <a href="https://www.kishimisu.art/">kishimisu</a>!
+      <img src="https://github.com/alexlnkp/CShaderToy/assets/79400603/fa816392-e44d-4fea-9d3d-af0ebd25fefd" alt="kishimasu shader art" width="330" style="display: block; margin-left: auto; margin-right: auto;" />
+    </td>
+    <td valign="top">
+
+    #version 330 core
+
+    uniform float iTime;
+    uniform vec2 iResolution;
+    out vec4 fragColor;
+
+    vec3 palette(float t) {
+        return vec3(0.5, 0.5, 0.5) + vec3(0.5, 0.5, 0.5) * cos(
+            6.28318 * (vec3(1.0, 1.0, 1.0) * t + vec3(0.263, 0.416, 0.557))
+        );
+    }
+
+    void main() {
+        vec2 uv = (gl_FragCoord.xy * 2.0 - iResolution) / iResolution.y;
+        vec2 uv0 = uv;
+        vec3 finalColor = vec3(0.0);
+
+        for (float i = 0.0; i < 3.0; i++) {
+            uv = fract(uv * 1.5) - 0.5;
+
+            float d = length(uv) * exp(-length(uv0));
+            d = pow(0.01 / abs(sin(d * 8.0 + iTime) / 8.0), 1.2);
+
+            finalColor += palette(length(uv0) + i * 0.4 + iTime * 0.4) * d;
+        }
+
+        fragColor = vec4(finalColor, 1.0);
+    }
+  </td>
+  </tr>
+  
 </table>
 
 ## What are you waiting for? Go ahead and make something cool!
