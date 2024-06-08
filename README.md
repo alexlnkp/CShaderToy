@@ -99,6 +99,48 @@ Here's a small demonstration video
     }
   </td>
   </tr>
+  <tr>
+    <td valign="center" halign="center">
+      <img src="https://github.com/alexlnkp/CShaderToy/assets/79400603/280e21d1-a0e7-46f4-879f-ce074c2b60d0" alt="my shader :)" width="330" style="display: block; margin-left: auto; margin-right: auto;" />
+    </td>
+    <td valign="top">
+
+    #version 330 core
+
+    uniform float iTime;
+    uniform vec2 iResolution;
+    out vec4 fragColor;
+    
+    vec3 palette(float t) {
+        return vec3(0.610, 0.498, 0.650) + vec3(0.388, 0.498, 0.350) * cos(
+            6.28314 * (vec3(0.530, 0.498, 0.620) *
+            t + vec3(3.438, 3.012, 4.025)));
+    }
+    
+    void main() {
+        vec2 uv = gl_FragCoord.xy / iResolution;
+        uv *= iResolution.x / iResolution.y;
+    
+        vec3 finalColor = vec3(0.0);
+        float brightness = 0.2;
+    
+        float uvLength = length(uv);
+        float timeOffset = iTime * 0.3;
+    
+        for (float i = 0.0; i < 1.0; i += 0.1) {
+            float phase = (iTime + uv.y + (uv.x * pow(2.0, i * 1.9))) * 3.5;
+            float shape = abs(0.8 * sin(phase));
+    
+            vec3 col = palette(uvLength + (i * 0.3) + timeOffset) * brightness;
+    
+            shape = pow(0.08 / shape, 1.3);
+            finalColor += col * shape;
+        }
+    
+        fragColor = vec4(finalColor, 1.0);
+    }
+  </td>
+  </tr>
   
 </table>
 
