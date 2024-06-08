@@ -35,5 +35,32 @@ Here's a small demonstration video
 
 [![demo](https://i.ytimg.com/vi/j519qeBmu3Y/maxresdefault.jpg)](https://youtu.be/j519qeBmu3Y "CShaderToy demo")
 
+## Examples
+<table>
+  <tr>
+    <td valign="top">
+      <img src="https://github.com/alexlnkp/CShaderToy/assets/79400603/1fc9d4ef-473f-4439-908e-9a90b26b80e2" alt="infamous-triangle" style="display: block; margin-left: auto; margin-right: auto;" />
+    </td>
+      <td valign="top">
+  
+      #version 330 core
+  
+      uniform float iTime;
+      uniform vec2 iResolution;
+      out vec4 fragColor;
+  
+      void main() {
+          vec2 uv = gl_FragCoord.xy / iResolution;
+  
+          vec3 x = iTime * 0.25 + uv.xyx + vec3(0, 2, 4);
+  
+          vec3 col = 0.5 + 0.5 * sin(cos(x * 0.5) + sin(x * x * 0.5));
+  
+          fragColor = vec4(col, 1.0);
+      }
+    
+  </td>
+  </tr>
+</table>
 
 ## What are you watining for? Go ahead and make something cool!
