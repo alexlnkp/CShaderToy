@@ -10,8 +10,45 @@
 
 #define ARR_LEN(x) (sizeof(x) / sizeof(x[0]))
 
-#define WINDOW_WIDTH  600
-#define WINDOW_HEIGHT 600
+/// Initialize GLFW
+#define _INIT_GLFW()                           \
+    if (!glfwInit()) {                         \
+        fprintf(stderr, "GLFW init failed\n"); \
+        return -1;                             \
+    }
+
+/// Initialize GLEW
+#define _INIT_GLEW()                           \
+    if (glewInit() != GLEW_OK) {               \
+        fprintf(stderr, "GLEW init failed\n"); \
+        return -1;                             \
+    }
+
+/// Allocate `size` bytes and set `ptr` to point to it
+/// Print an error message and exit if allocation fails
+#define ALLOC(ptr, size)                       \
+    *(ptr) = malloc(size);                     \
+    if (*(ptr) == NULL) {                      \
+        printf("Failed to allocate!\n");       \
+        exit(1);                               \
+    }
+
+/// GL Check Program `success` value
+#define GLCH_PROG_SUCCESS(success, info, prog, l_s, fmt) \
+    if (!success) {                                      \
+        glGetProgramInfoLog(prog, l_s, NULL, info);      \
+        printf(fmt, info);                               \
+    }
+
+/// GL Check Shader `success` value
+#define GLCH_SHADER_SUCCESS(success, info, shader, l_s, fmt) \
+    if (!success) {                                          \
+        glGetShaderInfoLog(shader, l_s, NULL, info);         \
+        printf(fmt, info);                                   \
+    }
+
+#define WINDOW_WIDTH  600 // Default window width
+#define WINDOW_HEIGHT 600 // Default window height
 
 static GLuint global_shader_program = 0;
 
@@ -29,7 +66,8 @@ char* read_shader(const char* filename) {
 
     fseek(fp, 0, SEEK_END); long size = ftell(fp); fseek(fp, 0, SEEK_SET);
 
-    char* buffer = malloc(size + 1);
+    char* buffer; ALLOC(&buffer, size + 1);
+
     fread(buffer, sizeof(char), size, fp); fclose(fp);
     buffer[size] = '\0';
 
@@ -44,10 +82,7 @@ GLuint compile_shader(const char* source, GLenum type) {
     GLchar info_log[512];
 
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(shader, 512, NULL, info_log);
-        fprintf(stderr, "Shader compilation failed: %s\n", info_log);
-    }
+    GLCH_SHADER_SUCCESS(success, info_log, shader, 512, "Shader compilation failed: %s\n");
 
     return shader;
 }
@@ -69,10 +104,8 @@ GLuint link_shaders(GLuint first_shader, ...) {
     GLint success;
     GLchar info_log[512];
     glGetProgramiv(shader_program, GL_LINK_STATUS, &success);
-    if (!success) {
-        glGetProgramInfoLog(shader_program, 512, NULL, info_log);
-        fprintf(stderr, "Shader program linking failed: %s\n", info_log);
-    }
+    GLCH_PROG_SUCCESS(success, info_log, shader_program, 512, "Shader program linking failed: %s\n");
+
     return shader_program;
 }
 
@@ -190,11 +223,7 @@ void CreateTriangleStripIndices(size_t vertexCount, GLuint** indices, size_t* in
 }
 
 int main(void) {
-    // Initialize GLFW
-    if (!glfwInit()) {
-        fprintf(stderr, "Failed to initialize GLFW\n");
-        return -1;
-    }
+    _INIT_GLFW();
 
     const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
  
@@ -224,10 +253,7 @@ int main(void) {
     glfwMakeContextCurrent(window);
 
     // Initialize GLEW
-    if (glewInit() != GLEW_OK) {
-        fprintf(stderr, "Failed to initialize GLEW\n");
-        return -1;
-    }
+    _INIT_GLEW();
 
     const char* vertex_shader_source   = read_shader("vertex.frag");
     const char* fragment_shader_source = read_shader("colors.frag");
@@ -297,7 +323,11 @@ int main(void) {
     GLuint iTimeUniform = glGetUniformLocation(global_shader_program, "iTime"      );
     GLuint iReslUniform = glGetUniformLocation(global_shader_program, "iResolution");
 
+    float timeValue;
+
     int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+    glViewport(0, 0, width, height);
 
     // The render loop
     while (!glfwWindowShouldClose(window)) {
@@ -306,7 +336,7 @@ int main(void) {
         glClear(GL_COLOR_BUFFER_BIT);
 
         // Update the 'time' uniform in the fragment shader
-        float timeValue = glfwGetTime();
+        timeValue = glfwGetTime();
         glUniform1f(iTimeUniform, timeValue);
 
         glUniform2f(iReslUniform, (float)width, (float)height);
