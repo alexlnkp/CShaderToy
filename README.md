@@ -24,7 +24,6 @@ GLSL shaders are widely-used by **MOST** game engines, including some of fan fav
 -   Use `./autobuild` shell script for simple building of the project. Zero bloat and build systems, just pure GCC
 -   Use GCC itself, don't forget to provide needed flags for libraries that we're using here!
 3. ???
-4. Profit!
 
 Since GLSL shaders can compile at run-time, You don't even have to recompile the main C source file every time you make a small change to the shader!
 Just click `R` on your keyboard and all of the shaders will automatically be re-compiled for You! 
@@ -38,4 +37,4 @@ Here's a small demonstration video
 ## Examples
 For example shaders, please take a look into [EXAMPLES](EXAMPLES.md)
 
-## What are you waiting for? Go ahead and make something cool!
+## Go ahead and make something cool!
